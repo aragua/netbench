@@ -75,39 +75,41 @@ int start_sync_client( char * server_addr, short port )
     struct sockaddr_in servAddr;
 
     /* create socket */
-     sockd = socket(AF_INET, SOCK_STREAM, 0);
-     if(sockd<0) {
-       perror("cannot open socket ");
-       exit(1);
-     }
+    sockd = socket(AF_INET, SOCK_STREAM, 0);
+    if(sockd<0) {
+        perror("cannot open socket ");
+        exit(1);
+    }
 
-     servAddr.sin_family = AF_INET;
-     servAddr.sin_addr.s_addr = inet_addr(server_addr);
-     servAddr.sin_port = htons(port);
+    servAddr.sin_family = AF_INET;
+    servAddr.sin_addr.s_addr = inet_addr(server_addr);
+    servAddr.sin_port = htons(port);
 
-     /* connect to server */
-      if ( connect(sockd, (struct sockaddr *) &servAddr, sizeof(servAddr)) <0) {
+    /* connect to server */
+    if ( connect(sockd, (struct sockaddr *) &servAddr, sizeof(servAddr)) <0) {
         perror("cannot connect ");
         exit(1);
-      }
+    }
 
-      memset( timestamp_buffer, 0, sizeof(struct timeval) * 10 );
+    memset( timestamp_buffer, 0, sizeof(struct timeval) * 10 );
 
-      gettimeofday( &timestamp_buffer[0], NULL);
-      write( sockd, timestamp_buffer, sizeof(struct timeval) * 10 );
-      read( sockd, timestamp_buffer, sizeof(struct timeval) * 10 );
-      gettimeofday( &timestamp_buffer[3], NULL);
-      gettimeofday( &timestamp_buffer[4], NULL);
-      write( sockd, timestamp_buffer, sizeof(struct timeval) * 10 );
-      read( sockd, timestamp_buffer, sizeof(struct timeval) * 10 );
-      gettimeofday( &timestamp_buffer[7], NULL);
+    gettimeofday( &timestamp_buffer[0], NULL);
+    write( sockd, timestamp_buffer, sizeof(struct timeval) * 10 );
+    read( sockd, timestamp_buffer, sizeof(struct timeval) * 10 );
+    gettimeofday( &timestamp_buffer[3], NULL);
+    gettimeofday( &timestamp_buffer[4], NULL);
+    write( sockd, timestamp_buffer, sizeof(struct timeval) * 10 );
+    read( sockd, timestamp_buffer, sizeof(struct timeval) * 10 );
+    gettimeofday( &timestamp_buffer[7], NULL);
 
-      /* treat timestamp_buffer */
+    /* treat timestamp_buffer */
+    printf("Synchronisation result:\n");
+    for ( loop = 0 ; loop < 8 ; loop++ )
+    {
+        printf("%d: %lu,%lu\n", loop, timestamp_buffer[loop].tv_sec, timestamp_buffer[loop].tv_usec );
+    }
 
-      for ( loop = 0 ; loop < 8 ; loop++ )
-      {
-      }
-      close(sockd);
+    close(sockd);
 
     return EXIT_SUCCESS;
 }
