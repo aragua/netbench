@@ -36,7 +36,7 @@ int check_args ( int argc, char ** argv )
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "abc:d:f:",
+        c = getopt_long (argc, argv, "s:m:p:",
                          long_options, &option_index);
 
         /* Detect the end of the options. */
@@ -56,7 +56,7 @@ int check_args ( int argc, char ** argv )
             break;
 
         case 's':
-            puts ("option -a\n");
+            sync_address = optarg;
             break;
 
         case 'm':
@@ -105,7 +105,7 @@ int main ( int argc, char ** argv )
         fprintf( stderr, "Usage: netbench {--server/--client} ...\n");
         return EXIT_FAILURE;
     }
-    else if ( server_mode == 0 )
+    else if ( server_mode == 1 )
         return start_server( mcast_address, port );
     else
         return start_client( sync_address, mcast_address, port );

@@ -1,11 +1,15 @@
 #include "synctime.h"
 
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdio.h>
+#include <sys/time.h>
+
+static struct timeval timestamp_buffer[10];
 
 int start_sync_server( short port )
 {
@@ -48,13 +52,14 @@ int start_sync_server( short port )
     }
 
     /* Do treatment ... */
-    {
-        char buffer[32];
-        int sz;
-        sz = read(newsockd, buffer, 32);
-        buffer[sz] = 0;
-        printf("%s\n",buffer);
-    }
+    read( newsockd, timestamp_buffer, sizeof(struct timeval) * 10 );
+    gettimeofday( &timestamp_buffer[1], NULL);
+    gettimeofday( &timestamp_buffer[2], NULL);
+    write( newsockd, timestamp_buffer, sizeof(struct timeval) * 10 );
+    read( newsockd, timestamp_buffer, sizeof(struct timeval) * 10 );
+    gettimeofday( &timestamp_buffer[5], NULL);
+    gettimeofday( &timestamp_buffer[6], NULL);
+    write( newsockd, timestamp_buffer, sizeof(struct timeval) * 10 );
 
     close(newsockd);
     close(sockd);
@@ -65,7 +70,7 @@ int start_sync_server( short port )
 
 int start_sync_client( char * server_addr, short port )
 {
-    int sockd;
+    int sockd, loop;
 
     struct sockaddr_in servAddr;
 
@@ -86,8 +91,23 @@ int start_sync_client( char * server_addr, short port )
         exit(1);
       }
 
-      write( sockd, "bonjour", 8 );
+      memset( timestamp_buffer, 0, sizeof(struct timeval) * 10 );
 
+      gettimeofday( &timestamp_buffer[0], NULL);
+      write( sockd, timestamp_buffer, sizeof(struct timeval) * 10 );
+      read( sockd, timestamp_buffer, sizeof(struct timeval) * 10 );
+      gettimeofday( &timestamp_buffer[3], NULL);
+      gettimeofday( &timestamp_buffer[4], NULL);
+      write( sockd, timestamp_buffer, sizeof(struct timeval) * 10 );
+      read( sockd, timestamp_buffer, sizeof(struct timeval) * 10 );
+      gettimeofday( &timestamp_buffer[7], NULL);
+
+      /* treat timestamp_buffer */
+
+      for ( loop = 0 ; loop < 8 ; loop++ )
+      {
+      }
+      close(sockd);
 
     return EXIT_SUCCESS;
 }
