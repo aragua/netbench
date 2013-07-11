@@ -10,5 +10,7 @@ int start_server(char *mcast, short port)
 
     ret = start_sync_server(port);
 
+    ret = start_udp_bcst_server("192.168.0.255", port);
+
     return ret;
 }

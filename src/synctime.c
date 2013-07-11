@@ -9,25 +9,12 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-typedef struct{
-    u_int64_t sec;
-    u_int64_t usec;
-} __attribute__((packed)) timestamp_t;
+#include "timestamp.h"
 
 #define TIMESTAMP_NUMBER 10
 static timestamp_t timestamp_buffer[TIMESTAMP_NUMBER];
 #define BUFFER_SIZE (sizeof(timestamp_t) * TIMESTAMP_NUMBER)
 
-
-timestamp_t timestamp()
-{
-    struct timeval ts;
-    timestamp_t ret;
-    gettimeofday( &ts, NULL );
-    ret.sec = (u_int64_t)ts.tv_sec;
-    ret.usec = (u_int64_t)ts.tv_usec;
-    return ret;
-}
 
 int start_sync_server( short port )
 {
@@ -88,7 +75,7 @@ int start_sync_server( short port )
 
 int start_sync_client( char * server_addr, short port )
 {
-    int sockd, loop;
+    int sockd;
 
     struct sockaddr_in servAddr;
 
@@ -122,10 +109,16 @@ int start_sync_client( char * server_addr, short port )
 
     /* treat timestamp_buffer */
     printf("Synchronisation result:\n");
-    for ( loop = 0 ; loop < 8 ; loop++ )
-    {
-        printf("%d: %lu,%lu\n", loop, timestamp_buffer[loop].sec, timestamp_buffer[loop].usec );
-    }
+    printf("-->%u,%u\n", timestamp_buffer[0].sec, timestamp_buffer[0].usec );
+    printf("<--\t\t%u,%u\n", timestamp_buffer[1].sec, timestamp_buffer[1].usec );
+    printf("-->%u,%u\n", timestamp_buffer[4].sec, timestamp_buffer[4].usec );
+    printf("<--\t\t%u,%u\n", timestamp_buffer[5].sec, timestamp_buffer[5].usec );
+    printf("---%u,%u\n", timestamp_buffer[7].sec, timestamp_buffer[7].usec );
+    printf("\n");
+    printf("%d +/- %d\n", ts_diff(timestamp_buffer[0],timestamp_buffer[1]), ts_diff(timestamp_buffer[0],timestamp_buffer[3]) );
+    printf("%d +/- %d\n", ts_diff(timestamp_buffer[2],timestamp_buffer[3]), ts_diff(timestamp_buffer[1],timestamp_buffer[5]) );
+    printf("%d +/- %d\n", ts_diff(timestamp_buffer[4],timestamp_buffer[5]), ts_diff(timestamp_buffer[1],timestamp_buffer[5]) );
+    printf("%d +/- %d\n", ts_diff(timestamp_buffer[6],timestamp_buffer[7]), ts_diff(timestamp_buffer[4],timestamp_buffer[7]) );
 
     close(sockd);
 
